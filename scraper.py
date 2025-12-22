@@ -8,7 +8,7 @@ def scrape_parking():
     url = "https://www.lugano.ch/en/vivere-lugano/muoversi-lugano/posteggi/"
     
     headers = {
-        'User-Agent': 'LuganoDashboardProject/1.0 (Hobby Project; contact: YOUR_EMAIL@HERE.com)',
+        'User-Agent': 'LuganoDashboardProject/1.0 (Hobby Project; contact: vizonarei@hotmail.com)',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
         'Upgrade-Insecure-Requests': '1'
     }
