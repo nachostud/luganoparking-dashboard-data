@@ -1,9 +1,4 @@
 {
-    "last_update": "14:20",
-    "garages": [
-        {
-            "name": "Error",
-            "free": "Check Scraper"
-        }
-    ]
+    "error": "Failed to fetch Lugano API",
+    "details": "Expecting value: line 3 column 2 (char 5)"
 }
