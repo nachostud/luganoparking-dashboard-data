@@ -4,67 +4,67 @@ import json
 from datetime import datetime
 
 def scrape_parking():
-    # We switch back to the main page which is usually less strictly guarded than the API
+    # We use the main parking page
     url = "https://www.lugano.ch/en/vivere-lugano/muoversi-lugano/posteggi/"
     
     headers = {
         'User-Agent': 'LuganoDashboardProject/1.0 (Hobby Project; contact: vizonarei@hotmail.com)',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-        'Upgrade-Insecure-Requests': '1'
+        'Accept-Language': 'en-US,en;q=0.5'
     }
     
     try:
-        response = requests.get(url, headers=headers, timeout=20)
+        response = requests.get(url, headers=headers, timeout=15)
         response.raise_for_status()
-        
-        # If we didn't get HTML, something is wrong
-        if "text/html" not in response.headers.get('Content-Type', ''):
-            raise Exception(f"Unexpected Content-Type: {response.headers.get('Content-Type')}")
-
         soup = BeautifulSoup(response.text, 'html.parser')
+        
         garages = []
-        
-        # This targets the specific "Parking" cards on the Lugano website
-        # We look for any element containing the garage names
-        targets = ["Motta", "LAC", "Balestra", "Castello", "Betty", "Marzio", "Resega"]
-        
-        # We search for the specific labels the site uses (e.g., "Free spaces")
-        for target in targets:
-            # Find the text "Motta", then look for the numbers near it
-            element = soup.find(string=lambda t: t and target in t)
-            if element:
-                parent = element.find_parent()
-                text_content = parent.get_text() if parent else ""
-                
-                # Logic to pull numbers (crude but effective)
-                # We look for "Free spaces: X" or just the number next to the name
-                import re
-                nums = re.findall(r'\d+', text_content)
-                if len(nums) >= 1:
+        # Target list items that contain the word "spaces" or "Centro"
+        items = soup.find_all('li')
+
+        # Garages we want to track
+        targets = ["Motta", "LAC", "Balestra", "Castello", "Bettydo", "Marzio", "Resega"]
+
+        for item in items:
+            text = item.get_text(separator='|').strip()
+            # Example text format: "Motta - Centro | Free spaces: 12"
+            
+            for target in targets:
+                if target.lower() in text.lower():
+                    # Extract the numbers using a simple split/filter
+                    parts = text.split('|')
+                    free_val = 0
+                    
+                    for p in parts:
+                        if "free" in p.lower() or "liberi" in p.lower() or "places" in p.lower():
+                            # Find the first number in this string
+                            nums = [int(s) for s in p.split() if s.isdigit()]
+                            if nums:
+                                free_val = nums[0]
+                    
                     garages.append({
                         "name": target,
-                        "free": int(nums[0]),
-                        "total": int(nums[1]) if len(nums) > 1 else 0
+                        "free": free_val
                     })
+                    break # Move to next list item
 
+        # Remove duplicates and format
+        unique_garages = {v['name']: v for v in garages}.values()
+        
         data = {
             "last_update": datetime.now().strftime("%H:%M"),
-            "garages": garages if garages else [{"name": "No Data", "free": 0}]
+            "garages": list(unique_garages)
         }
         
+        # If we still found nothing, we need to know why
+        if not data["garages"]:
+            data["error"] = "No garage matches found in HTML list"
+
         with open('parking.json', 'w') as f:
             json.dump(data, f, indent=4)
             
     except Exception as e:
-        # DEBUG: If it fails, we save the first 500 characters of the response 
-        # so we can see if it's a "403 Forbidden" or "Cloudflare" block.
-        error_msg = str(e)
         with open('parking.json', 'w') as f:
-            json.dump({
-                "error": "Scrape Failed",
-                "details": error_msg,
-                "timestamp": datetime.now().strftime("%H:%M")
-            }, f, indent=4)
+            json.dump({"error": "System Error", "details": str(e)}, f, indent=4)
 
 if __name__ == "__main__":
     scrape_parking()
