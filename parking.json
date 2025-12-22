@@ -1,9 +1,5 @@
 {
-    "last_update": "15:12",
-    "garages": [
-        {
-            "name": "No Data",
-            "free": 0
-        }
-    ]
+    "last_update": "15:35",
+    "garages": [],
+    "error": "No garage matches found in HTML list"
 }
