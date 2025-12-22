@@ -2,36 +2,33 @@ name: Update Parking Data
 
 on:
   schedule:
-    - cron: '*/10 * * * *'  # Runs every 10 minutes
-  workflow_dispatch:      # Allows you to click a button to run it manually
+    - cron: '*/10 * * * *' # Runs every 10 minutes
+  workflow_dispatch:      # Allows you to run it manually via the "Run workflow" button
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: '3.9'
 
-      - name: Install Dependencies
-        run: pip install requests beautifulsoup4
+      - name: Install dependencies
+        run: |
+          pip install requests beautifulsoup4
 
-      - name: Run Scraper
+      - name: Run scraper
         run: python scraper.py
 
-- name: Save Results
+      - name: Save Results
         run: |
           git config --global user.name 'GitHub Action'
           git config --global user.email 'action@github.com'
           git add parking.json
-          # We use 'git diff' to check if the file actually changed
-          if ! git diff --cached --exit-code; then
-            git commit -m "Auto-update parking data: $(date)"
-            git push
-          else
-            echo "No changes detected in parking.json. Skipping push."
-          fi
+          git commit -m "Auto-update parking data" || exit 0
+          git push
