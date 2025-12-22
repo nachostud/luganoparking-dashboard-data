@@ -1,5 +1,9 @@
 {
-    "last_update": "14:55",
-    "error": "Failed to fetch data",
-    "details": "Expecting value: line 3 column 2 (char 5)"
+    "last_update": "14:57",
+    "garages": [
+        {
+            "name": "No Data",
+            "free": 0
+        }
+    ]
 }
