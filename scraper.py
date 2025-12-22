@@ -1,67 +1,70 @@
 import requests
+from bs4 import BeautifulSoup
 import json
 from datetime import datetime
 
 def scrape_parking():
-    # The official Lugano City AJAX feed
-    url = "https://www.lugano.ch/en/vivere-lugano/muoversi-lugano/posteggi/content/0.html?ajax=true&ajaxAction=stat"
+    # We switch back to the main page which is usually less strictly guarded than the API
+    url = "https://www.lugano.ch/en/vivere-lugano/muoversi-lugano/posteggi/"
     
-    # STEALTH + RESPONSIBLE HEADERS
-    # We identify ourselves politely while providing the 'Referer' the server expects.
     headers = {
-        'User-Agent': 'LuganoDashboardProject/1.0 (Personal Hobby Project; contact: vizonarei@hotmail.com)',
-        'Accept': 'application/json, text/javascript, */*; q=0.01',
-        'X-Requested-With': 'XMLHttpRequest',
-        'Referer': 'https://www.lugano.ch/en/vivere-lugano/muoversi-lugano/posteggi/',
+        'User-Agent': 'LuganoDashboardProject/1.0 (Hobby Project; contact: YOUR_EMAIL@HERE.com)',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+        'Upgrade-Insecure-Requests': '1'
     }
     
     try:
-        # Using a session is more 'polite' as it reuses the connection
-        session = requests.Session()
-        response = session.get(url, headers=headers, timeout=15)
-        
-        # Raise an error if we didn't get a 200 OK response
+        response = requests.get(url, headers=headers, timeout=20)
         response.raise_for_status()
-
-        # Parse the JSON from the city
-        raw_data = response.json()
         
-        # Mapping our preferred display names to what is actually in the data
-        # 'Betty Do' and 'Campo Marzio' often have slight spelling variations in the feed
-        target_names = ["Motta", "LAC", "Balestra", "Castello", "Betty Do", "Campo Marzio", "Resega"]
-        garages_to_save = []
-        
-        for item in raw_data:
-            name = item.get('name', '').strip()
-            
-            # Check if this name matches any of our targets
-            if any(target in name for target in target_names):
-                garages_to_save.append({
-                    "name": name,
-                    "free": item.get('freeSlots', 0),
-                    "total": item.get('slots', 0)
-                })
+        # If we didn't get HTML, something is wrong
+        if "text/html" not in response.headers.get('Content-Type', ''):
+            raise Exception(f"Unexpected Content-Type: {response.headers.get('Content-Type')}")
 
-        # Final Dashboard Package
+        soup = BeautifulSoup(response.text, 'html.parser')
+        garages = []
+        
+        # This targets the specific "Parking" cards on the Lugano website
+        # We look for any element containing the garage names
+        targets = ["Motta", "LAC", "Balestra", "Castello", "Betty", "Marzio", "Resega"]
+        
+        # We search for the specific labels the site uses (e.g., "Free spaces")
+        for target in targets:
+            # Find the text "Motta", then look for the numbers near it
+            element = soup.find(string=lambda t: t and target in t)
+            if element:
+                parent = element.find_parent()
+                text_content = parent.get_text() if parent else ""
+                
+                # Logic to pull numbers (crude but effective)
+                # We look for "Free spaces: X" or just the number next to the name
+                import re
+                nums = re.findall(r'\d+', text_content)
+                if len(nums) >= 1:
+                    garages.append({
+                        "name": target,
+                        "free": int(nums[0]),
+                        "total": int(nums[1]) if len(nums) > 1 else 0
+                    })
+
         data = {
             "last_update": datetime.now().strftime("%H:%M"),
-            "garages": garages_to_save
+            "garages": garages if garages else [{"name": "No Data", "free": 0}]
         }
         
         with open('parking.json', 'w') as f:
             json.dump(data, f, indent=4)
-        print("Scrape Successful: parking.json updated.")
             
     except Exception as e:
-        # Log the error into the JSON so the ESP32 can tell us what went wrong
-        error_data = {
-            "last_update": datetime.now().strftime("%H:%M"),
-            "error": "Failed to fetch data",
-            "details": str(e)
-        }
+        # DEBUG: If it fails, we save the first 500 characters of the response 
+        # so we can see if it's a "403 Forbidden" or "Cloudflare" block.
+        error_msg = str(e)
         with open('parking.json', 'w') as f:
-            json.dump(error_data, f, indent=4)
-        print(f"Scrape Failed: {e}")
+            json.dump({
+                "error": "Scrape Failed",
+                "details": error_msg,
+                "timestamp": datetime.now().strftime("%H:%M")
+            }, f, indent=4)
 
 if __name__ == "__main__":
     scrape_parking()
