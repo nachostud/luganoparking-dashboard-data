@@ -23,10 +23,15 @@ jobs:
       - name: Run Scraper
         run: python scraper.py
 
-      - name: Save Results
+- name: Save Results
         run: |
           git config --global user.name 'GitHub Action'
           git config --global user.email 'action@github.com'
           git add parking.json
-          git commit -m "Auto-update parking data" || exit 0
-          git push
+          # We use 'git diff' to check if the file actually changed
+          if ! git diff --cached --exit-code; then
+            git commit -m "Auto-update parking data: $(date)"
+            git push
+          else
+            echo "No changes detected in parking.json. Skipping push."
+          fi
