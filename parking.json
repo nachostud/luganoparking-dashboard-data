@@ -1,9 +1,9 @@
 {
-    "last_update": "15:48",
+    "last_update": "15:51",
     "garages": [
         {
             "name": "LAC",
-            "free": 100
+            "free": 3
         }
     ]
 }
