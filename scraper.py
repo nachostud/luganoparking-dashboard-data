@@ -1,3 +1,9 @@
+import datetime
+import pytz # You might need to add this to your requirements/pip install
+
+lugano_time = datetime.datetime.now(pytz.timezone('Europe/Zurich')).strftime('%H:%M')
+# Then use lugano_time in your JSON 'last_update' field
+
 import requests
 from bs4 import BeautifulSoup
 import json
