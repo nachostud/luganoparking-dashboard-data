@@ -1,47 +1,51 @@
 import requests
-from bs4 import BeautifulSoup
 import json
 from datetime import datetime
 
 def scrape_parking():
-    url = "https://www.tio.ch/parking"
-    headers = {'User-Agent': 'Mozilla/5.0'}
+    # The official Lugano City AJAX feed
+    url = "https://www.lugano.ch/en/vivere-lugano/muoversi-lugano/posteggi/content/0.html?ajax=true&ajaxAction=stat"
+    
+    headers = {
+        'User-Agent': 'Mozilla/5.0'
+    }
     
     try:
         response = requests.get(url, headers=headers)
-        soup = BeautifulSoup(response.text, 'html.parser')
+        response.raise_for_status()
         
-        garages = []
+        # The URL returns a list of dictionaries directly
+        raw_data = response.json()
         
-        # Tio.ch lists parking in a table or list. 
-        # We look for the common row structure they use.
-        # Note: If Tio change their layout, we just update these 3 lines.
-        items = soup.select('.parking-list-item, tr') 
-
-        for item in items:
-            text = item.get_text(separator='|').strip()
-            parts = [p.strip() for p in text.split('|') if p.strip()]
+        # These are the garages we want to track
+        target_garages = ["Motta", "LAC", "Balestra", "Castello", "Betty Do", "Campo Marzio", "Resega"]
+        
+        garages_to_save = []
+        
+        for item in raw_data:
+            name = item.get('name', '').strip()
             
-            # We look for rows that have a name and a number
-            if len(parts) >= 2:
-                name = parts[0]
-                # Filter for the garages you care about
-                if name in ["Motta", "LAC", "Balestra", "Castello", "Bettydo", "C. Marzio", "Resega"]:
-                    # Clean up the numbers (Tio usually shows 'Free / Total')
-                    status = parts[1] 
-                    garages.append({"name": name, "free": status})
+            # Check if this garage is in our target list
+            if any(target in name for target in target_garages):
+                garages_to_save.append({
+                    "name": name,
+                    "free": item.get('freeSlots', 0),
+                    "total": item.get('slots', 0)
+                })
 
-        # Final Data Package
+        # Final Dashboard Package
         data = {
             "last_update": datetime.now().strftime("%H:%M"),
-            "garages": garages if garages else [{"name": "Error", "free": "Check Scraper"}]
+            "garages": garages_to_save
         }
         
         with open('parking.json', 'w') as f:
             json.dump(data, f, indent=4)
+        print("Success: Data saved to parking.json")
             
     except Exception as e:
-        print(f"Scrape failed: {e}")
+        with open('parking.json', 'w') as f:
+            json.dump({"error": "Failed to fetch Lugano API", "details": str(e)}, f, indent=4)
 
 if __name__ == "__main__":
     scrape_parking()
