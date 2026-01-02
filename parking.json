@@ -1,9 +1,9 @@
 {
-    "last_update": "08:49",
+    "last_update": "08:59",
     "garages": [
         {
             "name": "Balestra",
-            "free": 375,
+            "free": 372,
             "total": 426
         },
         {
@@ -13,7 +13,7 @@
         },
         {
             "name": "Campo Marzio",
-            "free": 146,
+            "free": 145,
             "total": 161
         },
         {
@@ -23,12 +23,12 @@
         },
         {
             "name": "Motta",
-            "free": 90,
+            "free": 85,
             "total": 165
         },
         {
             "name": "Piazza Castello",
-            "free": 229,
+            "free": 225,
             "total": 242
         },
         {
