@@ -1,9 +1,9 @@
 {
-    "last_update": "04:39",
+    "last_update": "05:27",
     "garages": [
         {
             "name": "Balestra",
-            "free": 420,
+            "free": 417,
             "total": 426
         },
         {
@@ -18,12 +18,12 @@
         },
         {
             "name": "LAC",
-            "free": 223,
+            "free": 222,
             "total": 232
         },
         {
             "name": "Motta",
-            "free": 157,
+            "free": 156,
             "total": 165
         },
         {
