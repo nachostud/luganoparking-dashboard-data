@@ -1,9 +1,9 @@
 {
-    "last_update": "12:40",
+    "last_update": "12:57",
     "garages": [
         {
             "name": "Balestra",
-            "free": 118,
+            "free": 115,
             "total": 426
         },
         {
@@ -18,7 +18,7 @@
         },
         {
             "name": "LAC",
-            "free": 67,
+            "free": 65,
             "total": 232
         },
         {
@@ -28,12 +28,12 @@
         },
         {
             "name": "Piazza Castello",
-            "free": 65,
+            "free": 61,
             "total": 242
         },
         {
             "name": "Resega",
-            "free": 298,
+            "free": 299,
             "total": 400
         }
     ]
