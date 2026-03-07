@@ -1,9 +1,9 @@
 {
-    "last_update": "20:51",
+    "last_update": "21:26",
     "garages": [
         {
             "name": "Balestra",
-            "free": 258,
+            "free": 238,
             "total": 426
         },
         {
@@ -13,17 +13,17 @@
         },
         {
             "name": "Campo Marzio",
-            "free": 62,
+            "free": 68,
             "total": 161
         },
         {
             "name": "LAC",
-            "free": 67,
+            "free": 88,
             "total": 232
         },
         {
             "name": "Motta",
-            "free": 49,
+            "free": 53,
             "total": 165
         },
         {
