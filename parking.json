@@ -1,9 +1,9 @@
 {
-    "last_update": "00:54",
+    "last_update": "01:35",
     "garages": [
         {
             "name": "Balestra",
-            "free": 246,
+            "free": 283,
             "total": 426
         },
         {
@@ -13,27 +13,27 @@
         },
         {
             "name": "Campo Marzio",
-            "free": 142,
+            "free": 148,
             "total": 161
         },
         {
             "name": "LAC",
-            "free": 167,
+            "free": 178,
             "total": 232
         },
         {
             "name": "Motta",
-            "free": 120,
+            "free": 121,
             "total": 165
         },
         {
             "name": "Piazza Castello",
-            "free": 62,
+            "free": 87,
             "total": 242
         },
         {
             "name": "Resega",
-            "free": 386,
+            "free": 387,
             "total": 400
         }
     ]
